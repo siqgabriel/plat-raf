@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Minha Rotina Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --bg4: #222222;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0f0;
+    --text2: #888;
+    --text3: #555;
+    --accent: #00e5a0;
+    --accent2: #00b8ff;
+    --accent3: #ff6b35;
+    --water: #00b8ff;
+    --done-bg: rgba(0,229,160,0.06);
+    --done-text: #3a3a3a;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100dvh; overscroll-behavior: none; }
+  body { padding-bottom: 40px; }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px 0;
+  }
+  .top-row1 {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 10px;
+  }
+  .app-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 1.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .top-actions { display: flex; gap: 8px; }
+  .btn-top {
+    height: 38px; min-width: 44px; padding: 0 12px;
+    border-radius: 20px; border: 1px solid var(--border);
+    background: var(--bg3); color: var(--text2);
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: all .15s; user-select: none; letter-spacing: .3px;
+  }
+  .btn-top:active { transform: scale(0.94); }
+  .btn-top.edit-active { background: var(--accent3); color: #fff; border-color: transparent; }
+  .btn-top.reset { color: #ff5555; border-color: rgba(255,85,85,0.25); }
+  .btn-top.reset:active { background: rgba(255,85,85,0.15); }
+
+  /* ── PROGRESS BAR ── */
+  .day-progress-wrap { padding: 0 0 10px; }
+  .dp-label { font-size: 10px; color: var(--text3); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .dp-bar { height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+  .dp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width .4s ease; }
+
+  /* ── WATER WIDGET ── */
+  #water-panel {
+    margin: 12px 14px;
+    background: linear-gradient(135deg, rgba(0,184,255,0.08), rgba(0,184,255,0.03));
+    border: 1px solid rgba(0,184,255,0.2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .water-icon { font-size: 26px; flex-shrink: 0; }
+  .water-info { flex: 1; min-width: 0; }
+  .water-label { font-size: 10px; color: var(--accent2); letter-spacing: .5px; text-transform: uppercase; font-weight: 600; }
+  .water-amounts {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px; font-weight: 600;
+    color: var(--text); line-height: 1.1; margin-top: 2px;
+  }
+  .water-amounts span { color: var(--accent2); }
+  .water-bar-wrap { margin-top: 6px; height: 4px; background: rgba(0,184,255,0.12); border-radius: 2px; overflow: hidden; }
+  .water-bar-fill { height: 100%; background: var(--water); border-radius: 2px; transition: width .3s ease; }
+  .water-controls { display: flex; flex-direction: column; gap: 6px; }
+  .water-btn {
+    width: 44px; height: 44px; border-radius: 12px; border: none;
+    font-size: 22px; font-weight: 300; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .12s; user-select: none;
+  }
+  .water-btn.plus { background: var(--accent2); color: var(--bg); }
+  .water-btn.minus { background: var(--bg4); color: var(--text2); }
+  .water-btn:active { transform: scale(0.88); }
+
+  /* ── MAIN CONTENT ── */
+  main { padding: 6px 14px; }
+
+  /* ── BLOCK ── */
+  .block {
+    margin-bottom: 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .block-header {
+    padding: 14px 16px 12px;
+    display: flex; align-items: flex-start; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+    position: relative;
+  }
+  .block-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .block-meta { flex: 1; min-width: 0; }
+  .block-name { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 1px; color: var(--text); }
+  .block-time { font-size: 11px; color: var(--text3); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+  .block-count { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .block-count b { color: var(--accent); font-weight: 600; }
+  .block-chevron { color: var(--text3); font-size: 14px; transition: transform .2s; flex-shrink: 0; margin-top: 2px; }
+  .block.collapsed .block-chevron { transform: rotate(-90deg); }
+  .block-body { padding: 6px 0; }
+  .block.collapsed .block-body { display: none; }
+
+  /* ── TASK ── */
+  .task {
+    display: flex; align-items: flex-start; gap: 0;
+    padding: 9px 14px 9px 12px;
+    min-height: 44px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background .15s, opacity .15s;
+    position: relative;
+  }
+  .task:last-child { border-bottom: none; }
+  .task.done { opacity: .4; background: var(--done-bg); }
+  .task-check-area {
+    width: 44px; height: 44px; min-width: 44px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; margin: -9px 0;
+  }
+  .task-checkbox {
+    width: 22px; height: 22px; border-radius: 7px;
+    border: 2px solid var(--bg4);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s; flex-shrink: 0;
+  }
+  .task.done .task-checkbox { background: var(--accent); border-color: var(--accent); }
+  .task-checkbox svg { display: none; }
+  .task.done .task-checkbox svg { display: block; }
+  .task-content { flex: 1; min-width: 0; padding: 2px 0; }
+  .task-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--accent2); letter-spacing: .3px;
+    margin-bottom: 2px; font-weight: 600;
+  }
+  .task-text {
+    font-size: 14px; line-height: 1.45; color: var(--text);
+    word-break: break-word;
+  }
+  .task.done .task-text { text-decoration: line-through; color: var(--text3); }
+  .task-tag {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    padding: 1px 6px; border-radius: 4px; margin-right: 4px;
+    text-transform: uppercase; letter-spacing: .4px;
+    vertical-align: 1px;
+  }
+  .tag-nutri { background: rgba(255,107,53,0.2); color: #ff8a5b; }
+  .tag-espi  { background: rgba(180,130,255,0.2); color: #c09aff; }
+  .tag-treino{ background: rgba(0,229,160,0.2); color: var(--accent); }
+  .tag-prof  { background: rgba(0,184,255,0.2); color: var(--accent2); }
+  .tag-pessoal{ background: rgba(255,200,50,0.2); color: #ffc832; }
+
+  /* edit mode */
+  .task-delete-btn {
+    display: none; width: 44px; height: 44px; min-width: 44px;
+    align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer;
+    color: #ff5555; font-size: 18px; margin: -9px 0 -9px 0;
+    flex-shrink: 0;
+  }
+  .edit-mode .task-delete-btn { display: flex; }
+  .task-text-input {
+    background: var(--bg3); border: 1px solid var(--accent3);
+    color: var(--text); border-radius: var(--radius-sm); padding: 6px 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    width: 100%; outline: none; resize: none; line-height: 1.4;
+  }
+  .add-task-row {
+    display: none; align-items: center; gap: 8px;
+    padding: 8px 14px; border-top: 1px dashed rgba(255,107,53,0.2);
+  }
+  .edit-mode .add-task-row { display: flex; }
+  .add-task-input {
+    flex: 1; background: var(--bg3); border: 1px solid var(--bg4);
+    color: var(--text); border-radius: var(--radius-sm); padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+  }
+  .add-task-input:focus { border-color: var(--accent3); }
+  .add-task-btn {
+    width: 44px; height: 44px; border-radius: 10px; border: none;
+    background: var(--accent3); color: #fff; font-size: 22px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all .12s;
+  }
+  .add-task-btn:active { transform: scale(0.88); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--bg3); color: var(--text);
+    border: 1px solid var(--border); border-radius: 24px;
+    padding: 10px 20px; font-size: 13px; font-weight: 500;
+    z-index: 999; transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .25s;
+    opacity: 0; white-space: nowrap; pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── MODAL CONFIRM ── */
+  #modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  #modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; max-width: 320px; width: 100%;
+  }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: #ff5555; }
+  .modal-body { font-size: 14px; color: var(--text2); margin-top: 8px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-btn {
+    flex: 1; height: 48px; border-radius: 10px; border: none;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: all .12s;
+  }
+  .modal-btn:active { transform: scale(0.96); }
+  .modal-btn.cancel { background: var(--bg4); color: var(--text2); }
+  .modal-btn.confirm { background: #ff5555; color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="top-row1">
+    <div class="app-title">Minha Rotina Performance</div>
+    <div class="top-actions">
+      <button class="btn-top reset" id="btn-reset" onclick="showResetModal()">↺ Reset</button>
+      <button class="btn-top" id="btn-edit" onclick="toggleEdit()">✏️ Editar</button>
+    </div>
+  </div>
+  <div class="day-progress-wrap">
+    <div class="dp-label">
+      <span>Progresso do Dia</span>
+      <span id="dp-pct">0%</span>
+    </div>
+    <div class="dp-bar"><div class="dp-fill" id="dp-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- WATER -->
+<div id="water-panel">
+  <div class="water-icon">💧</div>
+  <div class="water-info">
+    <div class="water-label">Meta: 4.0L de Água</div>
+    <div class="water-amounts" id="water-display"><span id="w-cur">0.0</span>L / 4.0L</div>
+    <div class="water-bar-wrap"><div class="water-bar-fill" id="water-bar" style="width:0%"></div></div>
+  </div>
+  <div class="water-controls">
+    <button class="water-btn plus" onclick="addWater(1)" aria-label="+250ml">+</button>
+    <button class="water-btn minus" onclick="addWater(-1)" aria-label="-250ml">−</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main id="main"></main>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">Resetar o Dia?</div>
+    <div class="modal-body">Todos os checkboxes serão desmarcados e o contador de água zerado. As tarefas editadas serão mantidas.</div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-btn confirm" onclick="doReset()">Resetar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════════════
+const DEFAULT_BLOCKS = [
+  {
+    id:'b1', emoji:'🌅', name:'Despertar & Conexão Espiritual', time:'07h00 – 08h00',
+    tasks:[
+      {id:'t1_1', time:'07h00', tag:null, text:'Acordar.'},
+      {id:'t1_2', time:'07h05', tag:'nutri', text:'Shot matinal (Água + Tribulus + Creatina + ½ Limão).'},
+      {id:'t1_3', time:'07h10', tag:'espi', text:'15 a 20 minutos de leitura bíblica, devocional, oração ou meditação.'},
+      {id:'t1_4', time:'07h30', tag:'pessoal', text:'Higiene matinal, arrumar a cama e organizar as metas do dia.'},
+    ]
+  },
+  {
+    id:'b2', emoji:'💪', name:'Nutrição & Treino Alta Performance', time:'08h00 – 12h00',
+    tasks:[
+      {id:'t2_1', time:'08h00', tag:'nutri', text:'Café da manhã: 1 Pão + 3 Ovos (2 gemas, 3 claras) + 500ml de água.'},
+      {id:'t2_2', time:'09h00', tag:'nutri', text:'Pré-Treino: Super Coffee + ½ Mamão ou 1 banana.'},
+      {id:'t2_3', time:'09h30–10h45', tag:'treino', text:'Musculação (Foco em Progressão de Carga) + 1L de água.'},
+      {id:'t2_4', time:'11h00', tag:'nutri', text:'Pós-Treino: Whey Protein batido com água + 1 fruta opcional.'},
+    ]
+  },
+  {
+    id:'b3', emoji:'🧠', name:'Foco Profissional & Almoço', time:'12h00 – 16h00',
+    tasks:[
+      {id:'t3_1', time:'12h00–13h00', tag:'prof', text:'Bloco de trabalho focado (reuniões, e-mails).'},
+      {id:'t3_2', time:'13h00', tag:'nutri', text:'Almoço: Arroz + Feijão + 1 Bife médio/grande + Salada de abobrinha.'},
+      {id:'t3_3', time:'13h30–16h00', tag:'prof', text:'Trabalho profundo de alta produtividade.'},
+    ]
+  },
+  {
+    id:'b4', emoji:'🌇', name:'Tarde Produtiva & Transição', time:'16h00 – 20h00',
+    tasks:[
+      {id:'t4_1', time:'16h00', tag:'nutri', text:'Café da Tarde: Iogurte natural + Frutas + 1L de água ao longo da tarde.'},
+      {id:'t4_2', time:'16h30–19h00', tag:'prof', text:'Finalização das demandas e planejamento do dia seguinte.'},
+      {id:'t4_3', time:'19h00–20h00', tag:'pessoal', text:'Tempo livre para a família, organizar a casa e tomar banho.'},
+    ]
+  },
+  {
+    id:'b5', emoji:'🌙', name:'Nutrição Noturna & Descanso', time:'20h00 – 23h00',
+    tasks:[
+      {id:'t5_1', time:'20h00', tag:'nutri', text:'Jantar: 120g de Patinho moído + 120g de Batata inglesa cozida + 500ml de água.'},
+      {id:'t5_2', time:'21h00', tag:'espi', text:'Leitura, momento de gratidão/oração e desligar telas.'},
+      {id:'t5_3', time:'22h00', tag:'nutri', text:'Ceia: Whey Protein + Kiwi com casca.'},
+      {id:'t5_4', time:'23h00', tag:'pessoal', text:'Dormir (Garantir 7–8h de sono).'},
+    ]
+  }
+];
+
+const TAGS = {
+  nutri:  ['tag-nutri','Nutrição'],
+  espi:   ['tag-espi','Espiritual'],
+  treino: ['tag-treino','Treino'],
+  prof:   ['tag-prof','Profissional'],
+  pessoal:['tag-pessoal','Pessoal'],
+};
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let blocks = [];
+let checked = {};
+let waterUnits = 0; // each unit = 250ml
+let editMode = false;
+let toastTimer = null;
+
+const LS_BLOCKS  = 'rotina_blocks_v2';
+const LS_CHECKED = 'rotina_checked_v2';
+const LS_WATER   = 'rotina_water_v2';
+
+function loadState() {
+  try { blocks  = JSON.parse(localStorage.getItem(LS_BLOCKS))  || JSON.parse(JSON.stringify(DEFAULT_BLOCKS)); } catch(e){ blocks = JSON.parse(JSON.stringify(DEFAULT_BLOCKS)); }
+  try { checked = JSON.parse(localStorage.getItem(LS_CHECKED)) || {}; } catch(e){ checked = {}; }
+  try { waterUnits = parseInt(localStorage.getItem(LS_WATER)) || 0; } catch(e){ waterUnits = 0; }
+}
+
+function saveBlocks()  { localStorage.setItem(LS_BLOCKS, JSON.stringify(blocks)); }
+function saveChecked() { localStorage.setItem(LS_CHECKED, JSON.stringify(checked)); }
+function saveWater()   { localStorage.setItem(LS_WATER, waterUnits); }
+
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+function render() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  blocks.forEach(block => {
+    main.appendChild(buildBlock(block));
+  });
+  updateProgress();
+  updateWaterUI();
+}
+
+function buildBlock(block) {
+  const div = document.createElement('div');
+  div.className = 'block';
+  div.id = 'block_' + block.id;
+
+  const total = block.tasks.length;
+  const done  = block.tasks.filter(t => checked[t.id]).length;
+
+  div.innerHTML = `
+    <div class="block-header" onclick="toggleBlock('${block.id}')">
+      <div class="block-emoji">${block.emoji}</div>
+      <div class="block-meta">
+        <div class="block-name">${block.name}</div>
+        <div class="block-time">${block.time}</div>
+        <div class="block-count"><b>${done}/${total}</b> concluídas</div>
+      </div>
+      <div class="block-chevron">▼</div>
+    </div>
+    <div class="block-body" id="body_${block.id}"></div>
+  `;
+
+  const body = div.querySelector('.block-body');
+  block.tasks.forEach(task => {
+    body.appendChild(buildTask(task, block.id));
+  });
+
+  // add task row
+  const addRow = document.createElement('div');
+  addRow.className = 'add-task-row';
+  addRow.id = 'add_' + block.id;
+  addRow.innerHTML = `
+    <input class="add-task-input" type="text" placeholder="Nova tarefa…" id="input_${block.id}" onkeydown="handleAddKey(event,'${block.id}')">
+    <button class="add-task-btn" onclick="addTask('${block.id}')">+</button>
+  `;
+  body.appendChild(addRow);
+
+  if (editMode) div.classList.add('edit-mode');
+
+  return div;
+}
+
+function buildTask(task, blockId) {
+  const div = document.createElement('div');
+  div.className = 'task' + (checked[task.id] ? ' done' : '');
+  div.id = 'task_' + task.id;
+
+  let tagHTML = '';
+  if (task.tag && TAGS[task.tag]) {
+    tagHTML = `<span class="task-tag ${TAGS[task.tag][0]}">${TAGS[task.tag][1]}</span>`;
+  }
+
+  div.innerHTML = `
+    <div class="task-check-area" onclick="toggleCheck('${task.id}','${blockId}')">
+      <div class="task-checkbox">
+        <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+          <path d="M1 4L4.5 7.5L11 1" stroke="#0a0a0a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="task-content">
+      <div class="task-time">${task.time}</div>
+      <div class="task-text" id="txt_${task.id}" onclick="editTask(event,'${task.id}','${blockId}')">${tagHTML}${escapeHtml(task.text)}</div>
+    </div>
+    <button class="task-delete-btn" onclick="deleteTask('${task.id}','${blockId}')" aria-label="Excluir">🗑</button>
+  `;
+  return div;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════
+function toggleCheck(taskId, blockId) {
+  if (editMode) return;
+  checked[taskId] = !checked[taskId];
+  saveChecked();
+  // update just this task
+  const taskEl = document.getElementById('task_' + taskId);
+  if (taskEl) {
+    taskEl.classList.toggle('done', checked[taskId]);
+  }
+  updateBlockCount(blockId);
+  updateProgress();
+}
+
+function updateBlockCount(blockId) {
+  const block = blocks.find(b => b.id === blockId);
+  if (!block) return;
+  const total = block.tasks.length;
+  const done  = block.tasks.filter(t => checked[t.id]).length;
+  const el = document.querySelector(`#block_${blockId} .block-count`);
+  if (el) el.innerHTML = `<b>${done}/${total}</b> concluídas`;
+}
+
+function toggleBlock(blockId) {
+  const el = document.getElementById('block_' + blockId);
+  if (el) el.classList.toggle('collapsed');
+}
+
+function toggleEdit() {
+  editMode = !editMode;
+  const btn = document.getElementById('btn-edit');
+  btn.textContent = editMode ? '✅ Pronto' : '✏️ Editar';
+  btn.classList.toggle('edit-active', editMode);
+  document.querySelectorAll('.block').forEach(b => b.classList.toggle('edit-mode', editMode));
+  showToast(editMode ? 'Modo edição ativado' : 'Alterações salvas');
+}
+
+function editTask(e, taskId, blockId) {
+  if (!editMode) return;
+  const txtEl = document.getElementById('txt_' + taskId);
+  if (!txtEl || txtEl.querySelector('textarea')) return;
+
+  const block = blocks.find(b => b.id === blockId);
+  const task  = block && block.tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'task-text-input';
+  textarea.rows = 2;
+  textarea.value = task.text;
+  txtEl.replaceWith(textarea);
+  textarea.focus();
+
+  textarea.addEventListener('blur', () => {
+    task.text = textarea.value.trim() || task.text;
+    saveBlocks();
+    // rebuild just this block
+    const blockEl = document.getElementById('block_' + blockId);
+    const newBlock = buildBlock(block);
+    blockEl.replaceWith(newBlock);
+    if (editMode) document.getElementById('block_' + blockId).classList.add('edit-mode');
+  });
+}
+
+function deleteTask(taskId, blockId) {
+  const block = blocks.find(b => b.id === blockId);
+  if (!block) return;
+  block.tasks = block.tasks.filter(t => t.id !== taskId);
+  delete checked[taskId];
+  saveBlocks(); saveChecked();
+  const blockEl = document.getElementById('block_' + blockId);
+  const newBlock = buildBlock(block);
+  blockEl.replaceWith(newBlock);
+  if (editMode) document.getElementById('block_' + blockId).classList.add('edit-mode');
+  updateProgress();
+  showToast('Tarefa removida');
+}
+
+function addTask(blockId) {
+  const input = document.getElementById('input_' + blockId);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  const block = blocks.find(b => b.id === blockId);
+  if (!block) return;
+  const newId = 'custom_' + Date.now();
+  block.tasks.push({ id: newId, time: '—', tag: null, text });
+  saveBlocks();
+  input.value = '';
+  const blockEl = document.getElementById('block_' + blockId);
+  const newBlock = buildBlock(block);
+  blockEl.replaceWith(newBlock);
+  if (editMode) document.getElementById('block_' + blockId).classList.add('edit-mode');
+  // re-focus
+  const ni = document.getElementById('input_' + blockId);
+  if (ni) ni.focus();
+  updateProgress();
+  showToast('Tarefa adicionada ✓');
+}
+
+function handleAddKey(e, blockId) {
+  if (e.key === 'Enter') { e.preventDefault(); addTask(blockId); }
+}
+
+// ═══════════════════════════════════════════════
+// WATER
+// ═══════════════════════════════════════════════
+function addWater(delta) {
+  waterUnits = Math.max(0, Math.min(16, waterUnits + delta)); // 0 to 4L
+  saveWater();
+  updateWaterUI();
+  if (delta > 0) showToast('+250ml 💧');
+}
+
+function updateWaterUI() {
+  const liters = (waterUnits * 0.25).toFixed(1);
+  const pct = Math.min(100, (waterUnits / 16) * 100);
+  document.getElementById('w-cur').textContent = liters;
+  document.getElementById('water-bar').style.width = pct + '%';
+}
+
+// ═══════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════
+function updateProgress() {
+  let total = 0, done = 0;
+  blocks.forEach(b => {
+    total += b.tasks.length;
+    done  += b.tasks.filter(t => checked[t.id]).length;
+  });
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('dp-fill').style.width = pct + '%';
+  document.getElementById('dp-pct').textContent = pct + '%';
+}
+
+// ═══════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════
+function showResetModal() { document.getElementById('modal-overlay').classList.add('show'); }
+function closeModal()     { document.getElementById('modal-overlay').classList.remove('show'); }
+function doReset() {
+  checked = {};
+  waterUnits = 0;
+  saveChecked(); saveWater();
+  closeModal();
+  render();
+  showToast('Novo dia começou! 🌅');
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+loadState();
+render();
+</script>
+</body>
+</html>
